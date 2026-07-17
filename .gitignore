@@ -1,0 +1,76 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Flask / Web-spezifisch:
+instance/
+.webassets-cache
+.env
+
+# Environments (Virtuelle Umgebungen - extrem wichtig!)
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Datenbank-Dateien (Verhindert das Überschreiben eurer lokalen Testdaten)
+*.db
+*.sqlite
+*.sqlite3
+db.sqlite3-journal
+
+# OS-spezifische Dateien
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs und Editoren
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
