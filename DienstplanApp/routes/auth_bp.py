@@ -1,6 +1,6 @@
 from flask import Blueprint, request , render_template
 
-auth = Blueprint(__name__)
+auth = Blueprint("auth",__name__)
 
 @auth.route("/register")
 def register():
