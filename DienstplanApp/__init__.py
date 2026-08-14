@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from DienstplanApp.extensions import db , migrate
+from DienstplanApp.extensions import db , migrate, csrf
 
 
 def create_app(test_config = None):
@@ -18,6 +18,7 @@ def create_app(test_config = None):
     ###### Initialisierungen #########
     db.init_app(app)
     migrate.init_app(app, db)
+    csrf.init_app(app)
 
     ###### Routen u. Blueprints #########
     @app.route("/")
@@ -33,6 +34,12 @@ def create_app(test_config = None):
     from DienstplanApp.models.user import User
     from DienstplanApp.models.company import Company
     from DienstplanApp.models.department import Department
+    from DienstplanApp.models.shift import Shift
+    from DienstplanApp.models.shift_type import Shift_Type
+    from DienstplanApp.models.qualification import Qualification
+    from DienstplanApp.models.user_qualification import User_Qualification
+    from DienstplanApp.models.absence import Absence
 
+    
     return app
  
