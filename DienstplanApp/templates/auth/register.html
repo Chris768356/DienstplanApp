@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block header %}
+    <h2>Registrieren</h2>
+{% endblock header %}
+
+{% block content %}
+    <form action="" method="post">
+        <input type="text" name="firstname" id="firstname" placeholder="Vorname" required>
+        <input type="text" name="lastname" id="lastname" placeholder="Nachname" required>
+
+        <input type="email" name="email" id="email" placeholder="Email Adresse" required>
+        <input type="email" name="confirm_email" id="confirm_email" placeholder="Email Adresse bestätigen" required>
+
+        <input type="password" name="password" id="password" placeholder="Passwort" required>
+        <input type="password" name="confirm_password" id="confirm_password" placeholder="Passwort bestätigen" required>
+
+        <input type="text" name="invite_code" id="invite_code" placeholder="Einladungscode (optional)">
+        
+        <input type="checkbox" name="dsgvo" id="dsgvo" value="dsgvo_accepted" required>
+        <label for="dsgvo"><a href="/dsgvo">DSGVO</a> gelesen und akzeptiert</label>
+        
+        <input type="checkbox" name="agb" id="agb" value="agb_accepted" required>
+        <label for="agb"><a href="/agb">AGB</a> gelesen und akzeptiert</label>
+
+        <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+        
+        <button type="submit">Registrieren</button>
+    </form>
+{% endblock content %}
