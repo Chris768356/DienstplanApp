@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block header %}
+    <h2>Login</h2>
+{% endblock header %}
+
+{% block content %}
+    <form action="" method="post">
+        <input type="email" name="email" id="email" placeholder="E-Mail Adresse" required>
+        <input type="password" name="password" id="password" placeholder="Passwort" required>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit">Login</button>
+    </form>
+{% endblock content %}

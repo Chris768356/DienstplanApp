@@ -12,7 +12,13 @@
     <nav>
         <ul>
             <li><a href="{{url_for('index')}}">Startseite</a></li>
-            <li><a href="{{url_for('auth.register')}}">Registrieren</a></li>
+            {% if current_user.is_authenticated %}
+                <li><a href="{{url_for('profile.profile')}}">Profil</a></li>
+                <li><a href="{{url_for('auth.logout')}}">Logout</a></li>
+            {% else %}
+                <li><a href="{{url_for('auth.register')}}">Registrieren</a></li>
+                <li><a href="{{url_for('auth.login')}}">Login</a></li>
+            {% endif %}
         </ul>
     </nav>
     {% block header %}

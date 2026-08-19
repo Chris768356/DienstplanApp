@@ -1,6 +1,6 @@
 from flask import Flask, render_template
-from DienstplanApp.extensions import db , migrate, csrf
-
+from DienstplanApp.extensions import db , migrate, csrf, login_manager, limiter
+from flask_wtf.csrf import CSRFError
 
 def create_app(test_config = None):
     app = Flask(__name__)
@@ -19,6 +19,8 @@ def create_app(test_config = None):
     db.init_app(app)
     migrate.init_app(app, db)
     csrf.init_app(app)
+    login_manager.init_app(app)
+    limiter.init_app(app)
 
     ###### Routen u. Blueprints #########
     @app.route("/")
@@ -27,6 +29,9 @@ def create_app(test_config = None):
     
     from DienstplanApp.routes.auth_bp import auth 
     app.register_blueprint(auth, url_prefix="/auth")
+    
+    from DienstplanApp.routes.profile_bp import profile_bp
+    app.register_blueprint(profile_bp, url_prefix="/profile")
     
     ####### Modelle laden ############
     from DienstplanApp.models.user_login import User_login
