@@ -1,43 +1,55 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DienstplanApp</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
 
-<header>
-    <h1>DienstplanApp</h1>
-    <nav>
-        <ul>
-            <li><a href="{{url_for('index')}}">Startseite</a></li>
-            {% if current_user.is_authenticated %}
+    <header>
+        <h1>DienstplanApp
+            <img src="{{ url_for('static', filename='img/DienstButlerLogo.png') }}" alt="DienstButler Logo">
+        </h1>
+        <nav>
+            <ul>
+                <li><a href="{{url_for('index')}}">Startseite</a></li>
+                {% if current_user.is_authenticated %}
                 <li><a href="{{url_for('profile.profile')}}">Profil</a></li>
                 <li><a href="{{url_for('auth.logout')}}">Logout</a></li>
-            {% else %}
+                {% else %}
                 <li><a href="{{url_for('auth.register')}}">Registrieren</a></li>
                 <li><a href="{{url_for('auth.login')}}">Login</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-    {% block header %}
-    
-    {% endblock header %}
-</header>
-<main>
-    {% with messages = get_flashed_messages(with_categories = true) %}
+                {% endif %}
+            </ul>
+        </nav>
+
+    </header>
+    <main>
+        {% block header %}
+
+        {% endblock header %}
+
+        {% with messages = get_flashed_messages(with_categories = true) %}
         {% if messages %}
-            {% for category, message in messages  %}
-                <div class ="flash {{category}}">{{ message }}</div>
-            {% endfor %}       
+        {% for category, message in messages %}
+        <div class="flash {{category}}">{{ message }}</div>
+        {% endfor %}
         {% endif %}
-    {% endwith %}
-    
-    {% block content %}
-    
-    {% endblock content %}
-</main>
+        {% endwith %}
+
+        {% block content %}
+
+        {% endblock content %}
+    </main>
+
+    <footer>
+    </footer>
 
 </body>
+
 </html>

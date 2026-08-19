@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 
 {% block header %}
-    <h2>Willkommen</h2>
-{% endblock header %}  
+<h2>Willkommen</h2>
+{% endblock header %}
 
 {% block content %}
-    {% if current_user.is_authenticated %}
-        <p>Willkommen {{current_user.user_data.firstname}} {{current_user.user_data.lastname}}</p>
-    {% else %}
-        <p>Bitte <a href="{{url_for('auth.login')}}">einloggen</a> oder <a href="{{url_for('auth.register')}}">registrieren</a> </p>
-    {% endif %}
-{% endblock content %} 
+{% if current_user.is_authenticated %}
+<p>Willkommen {{current_user.user_data.firstname}} {{current_user.user_data.lastname}}</p>
+{% else %}
+<p>Bitte <a href="{{url_for('auth.login')}}">einloggen</a> oder <a href="{{url_for('auth.register')}}">registrieren</a>
+</p>
+{% endif %}
+{% endblock content %}

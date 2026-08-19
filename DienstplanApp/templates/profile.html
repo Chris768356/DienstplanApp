@@ -1,33 +1,35 @@
 {% extends "base.html" %}
 
 {% block header %}
-    <h2>Profil von {{current_user.user_data.firstname}} {{current_user.user_data.lastname}}</h2>
+<h2>Profil von {{current_user.user_data.firstname}} {{current_user.user_data.lastname}}</h2>
 {% endblock header %}
 
 {% block content %}
 
-    {% if request.args.get("mode") == "edit" %}
-        <form action="" method="post">
-            <ul>
-                <li>Vorname: <input type="text" name="firstname" id="firstname", value="{{current_user.user_data.firstname}}"></li>
-                <li>Nachname: <input type="text" name="lastname" id="lastname" value="{{current_user.user_data.lastname}}"></li>
-                <li>E-Mail: <input type="text" name="email" id="email" value="{{current_user.email}}"></li>
-                <li>E-Mail bestätigen : <input type="text" name="email-confirm" id="email-confirm" value="{{current_user.email}}"></li>
-            </ul>
-            <button type="submit">Speichern</button>
-            <a href="/profile" >abbrechen</a>
-        </form>
-    {% else %}
-        <ul>
-            <li>Vorname: {{current_user.user_data.firstname}}</li>
-            <li>Nachname: {{current_user.user_data.lastname}}</li>
-            <li>E-Mail: {{current_user.email}}</li>
-            <li>Firmenname: {{current_user.user_data.company_id.company_name}}</li>
-            {% if current_user.user_data.department_id %}
-                <li>Abteilung: {{current_user.user_data.department_id.department_name}}</li>
-            {% endif %}
-        </ul>
-        <a href="?mode=edit">bearbeiten</a>
+{% if request.args.get("mode") == "edit" %}
+<form action="" method="post">
+    <ul>
+        <li>Vorname: <input type="text" name="firstname" id="firstname" , value="{{current_user.user_data.firstname}}">
+        </li>
+        <li>Nachname: <input type="text" name="lastname" id="lastname" value="{{current_user.user_data.lastname}}"></li>
+        <li>E-Mail: <input type="text" name="email" id="email" value="{{current_user.email}}"></li>
+        <li>E-Mail bestätigen : <input type="text" name="email-confirm" id="email-confirm"
+                value="{{current_user.email}}"></li>
+    </ul>
+    <button type="submit">Speichern</button>
+    <a href="/profile">abbrechen</a>
+</form>
+{% else %}
+<ul>
+    <li>Vorname: {{current_user.user_data.firstname}}</li>
+    <li>Nachname: {{current_user.user_data.lastname}}</li>
+    <li>E-Mail: {{current_user.email}}</li>
+    <li>Firmenname: {{current_user.user_data.company_id.company_name}}</li>
+    {% if current_user.user_data.department_id %}
+    <li>Abteilung: {{current_user.user_data.department_id.department_name}}</li>
     {% endif %}
+</ul>
+<a href="?mode=edit">bearbeiten</a>
+{% endif %}
 
 {% endblock content %}
