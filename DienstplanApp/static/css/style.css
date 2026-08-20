@@ -11,7 +11,7 @@
 body {
     background-color: #F4F6FA;
     min-height: 100vh;
-    font-family: Arial, sans-serif;
+    font-family: "Inter", sans-serif;
     display: flex;
     flex-direction: column;
 }
@@ -80,6 +80,35 @@ footer {
    Formulare
    ========================= */
 
+.form-card img {
+    width: 70px;
+    display: block;
+    margin: 0 auto 15px;
+}
+
+.form-card {
+    background-color: white;
+    padding: 30px;
+    width: 400px;
+    margin: 40px auto;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.form-card button {
+    display: block;
+    margin: 10px auto 0px;
+}
+
+.form-card h2 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.form-card input {
+    margin-bottom: 10px;
+}
 
 /* =========================
    Meldungen
