@@ -1,9 +1,28 @@
 {% extends "base.html" %}
 
-{% block header %}
-    <h2>Willkommen</h2>
-{% endblock header %}  
-
 {% block content %}
-    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempore ab modi maxime ad totam quaerat repellendus eius veritatis. Aliquid laborum porro nisi voluptate accusamus ipsam provident id nobis natus maxime.</p>
-{% endblock content %} 
+<!-- Die Überschrift "Willkommen" aus grafik.png -->
+<h2 class="page-title">Willkommen beim Dienst-Butler</h2>
+
+<div class="card info-card">
+    <div class="info-content">
+        <h3>Deine smarte Schichtplanung</h3>
+        <p>Organisiere Dienstpläne effizient, behalte Abwesenheiten im Blick und besetze Schichten automatisch passend zu den Qualifikationen deines Teams.</p>
+        
+        <div class="feature-grid">
+            <div class="feature-item">
+                <span class="feature-icon">📅</span>
+                <p><strong>Übersicht</strong><br>Alle Schichten zentral an einem Ort.</p>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">🎓</span>
+                <p><strong>Qualifikationen</strong><br>Smarte Zuweisung nach Skills.</p>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">🏖️</span>
+                <p><strong>Abwesenheiten</strong><br>Automatischer Check bei Urlaub.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

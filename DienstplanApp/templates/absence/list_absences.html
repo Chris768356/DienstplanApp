@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block header %}
+    <h2>Übersicht der Abwesenheiten</h2>
+{% endblock header %}
+
+{% block content %}
+    
+    {% if absences %}
+        <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; text-align: left;">
+            <thead>
+                <tr>
+                    <th>Mitarbeiter</th>
+                    <th>Art</th>
+                    <th>Zeitraum</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for abs in absences %}
+                <tr>
+                    <td>{{ abs.user.firstname }} {{ abs.user.lastname }}</td>
+                    <td>{{ abs.type }}</td>
+                    <td>{{ abs.start_date.strftime('%d.%m.%Y') }} - {{ abs.end_date.strftime('%d.%m.%Y') }}</td>
+                    <td>
+                        {% if abs.status %}
+                            <span style="color: green;">Genehmigt</span>
+                        {% else %}
+                            <span style="color: orange;">Ausstehend</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Bisher wurden keine Abwesenheiten eingetragen.</p>
+    {% endif %}
+
+    <br>
+    <a href="{{ url_for('absence.create_absence') }}">Neue Abwesenheit eintragen</a>
+
+{% endblock content %}
