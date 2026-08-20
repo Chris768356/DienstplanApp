@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block header %}
+    <h2>Qualifikationen verwalten</h2>
+{% endblock header %}
+
+{% block content %}
+    <h3>Neue Qualifikation eintragen</h3>
+    <form action="{{ url_for('qualification.create_qualification') }}" method="POST">
+        <div>
+            <label for="name">Name der Qualifikation:</label>
+            <input type="text" name="name" placeholder="z.B. Ersthelfer" required>
+        </div>
+        
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit">Speichern</button>
+    </form>
+
+    <hr>
+    
+    <h3>Vorhandene Qualifikationen:</h3>
+    {% if qualifications %}
+        <ul>
+            {% for qual in qualifications %}
+                <li>{{ qual.name }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Bisher wurden noch keine Qualifikationen angelegt.</p>
+    {% endif %}
+{% endblock content %}

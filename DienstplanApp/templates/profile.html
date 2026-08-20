@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block header %}
+    <h2>Profil von {{ current_user.user_data.firstname }} {{current_user.user_data.lastname}}</h2>
+{% endblock header %}
+
+{% block content %}
+
+    {% if request.args.get("mode") == "edit" %}
+        <form action="{{ url_for('profile.update_profile') }}" method="post">
+            <ul>
+                <li> Vorname: <input type="text" name="firstname" id="firstname" value="{{current_user.user_data.firstname}}" required></li>
+                <li> Name: <input type="text" name="lastname" id="lastname" value="{{current_user.user_data.lastname}}" required></li>
+                <li> E-Mail: <input type="email" name="email" id="email" value="{{current_user.email}}" required></li>
+                <li> E-Mail bestätigen: <input type="email" name="email-confirm" id="email-confirm" value="{{current_user.email}}" required></li>
+                
+                <!-- Firmen-Dropdown -->
+                <li> Firma: 
+                    <select name="company_id">
+                        <option value="">-- Keine Firma --</option>
+                        {% for comp in companies %}
+                            <option value="{{ comp.id }}" {% if current_user.user_data.company_id == comp.id %}selected{% endif %}>
+                                {{ comp.company_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </li>
+                
+                <!-- Abteilungs-Dropdown -->
+                <li> Abteilung: 
+                    <select name="department_id">
+                        <option value="">-- Keine Abteilung --</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept.id }}" {% if current_user.user_data.department_id == dept.id %}selected{% endif %}>
+                                {{ dept.department_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </li>
+
+                <!-- Checkboxen für Qualifikationen -->
+                <li> Qualifikationen: <br>
+                    {% for qual in qualifications %}
+                        <label>
+                            <!-- Wenn der User diese Qualifikation schon hat, setzen wir automatisch das Häkchen (checked) -->
+                            <input type="checkbox" name="qualifications" value="{{ qual.id }}" 
+                            {% if qual in current_user.user_data.qualifications %}checked{% endif %}>
+                            {{ qual.name }}
+                        </label><br>
+                    {% endfor %}
+                </li>
+
+            </ul>
+            
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit">Speichern</button>
+            <a href="{{ url_for('profile.profile') }}">Abbrechen</a>
+        </form>
+    {% else %}
+        <ul>
+            <li><strong>Rolle / Rechte:</strong> 
+                {% if current_user.user_data.role %}
+                    {{ current_user.user_data.role.description }}
+                {% else %}
+                    Nicht zugewiesen
+                {% endif %}
+            </li>
+
+            <li>Vorname: {{ current_user.user_data.firstname }}</li>
+            <li>Nachname: {{ current_user.user_data.lastname }}</li>
+            <li>E-Mail: {{ current_user.email }}</li>
+            
+            <!-- "_id" entfernt. Wir greifen auf das Beziehungsobjekt (relationship) zu, nicht auf die nackte ID (Integer) -->
+            <li>Firmenname: {{ current_user.user_data.company.company_name }}</li>
+            
+            <!-- "_id" entfernt für die Abfrage und die Anzeige -->
+            {% if current_user.user_data.department %}
+                <li>Abteilung: {{ current_user.user_data.department.department_name }}</li>
+            {% endif %}
+
+            <!-- Anzeige der Qualifikationen -->
+            {% if current_user.user_data.qualifications %}
+                <li>Qualifikationen:
+                    <ul>
+                    {% for qual in current_user.user_data.qualifications %}
+                        <li>{{ qual.name }}</li>
+                    {% endfor %}
+                    </ul>
+                </li>
+            {% endif %}
+
+        </ul>
+        <a href="?mode=edit">Bearbeiten</a>
+    {% endif %}
+
+{% endblock %}
