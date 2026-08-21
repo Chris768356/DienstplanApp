@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
@@ -144,30 +144,62 @@ def assign_shift():
 @login_required
 @company_required
 def list_shifts():
-    """Zeigt alle zugewiesenen Schichten (den Dienstplan) in einer Tabelle an, gefiltert nach Rechten."""
-    # +++ SICHERER ABFRAGE-BLOCK +++
+    """Zeigt alle zugewiesenen Schichten mit dynamischem Filter an."""
     user_data = getattr(current_user, 'user_data', None)
     role = user_data.role.description if user_data and user_data.role else None
     my_company_id = user_data.company_id if user_data else None
     my_user_id = user_data.id if user_data else None
 
-    # Rechte-Prüfung
+    # 1. Filter-Parameter aus der URL abfangen (request.args statt request.form bei GET)
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+    department_id = request.args.get('department_id')
+    filter_user_id = request.args.get('user_id')
+
+    # 2. Grundabfrage aufbauen (Wir starten mit der Basis und hängen Filter an)
+    query = db.select(Shift)
+
+    # Rollen-Rechte anwenden
     if role == 'Admin':
-        shifts = db.session.scalars(db.select(Shift).order_by(Shift.shift_date)).all()
+        pass # Admin darf alles filtern
     elif not my_company_id:
-        shifts = [] # Nutzer ohne Firma sieht nichts
+        query = query.where(False) # Kein Zugriff
     elif role == 'Planer':
-        shifts = db.session.scalars(
-            db.select(Shift).join(Department).where(Department.company_id == my_company_id).order_by(Shift.shift_date)
-        ).all()
+        # Planer sieht nur Schichten seiner eigenen Firma
+        query = query.join(Department).where(Department.company_id == my_company_id)
     elif role == 'Mitarbeiter':
-        shifts = db.session.scalars(
-            db.select(Shift).where(Shift.user_id == my_user_id).order_by(Shift.shift_date)
-        ).all()
+        # Mitarbeiter sieht hart codiert nur sich selbst
+        query = query.where(Shift.user_id == my_user_id)
     else:
-        shifts = []
-    
-    # Kollisionsprüfung für die Anzeige
+        query = query.where(False)
+
+    # 3. Dynamische GET-Filter anwenden (wenn der Nutzer im Formular etwas gewählt hat)
+    if start_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            query = query.where(Shift.shift_date >= start_date)
+        except ValueError:
+            pass
+            
+    if end_date_str:
+        try:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+            query = query.where(Shift.shift_date <= end_date)
+        except ValueError:
+            pass
+
+    # Abteilung und Mitarbeiter dürfen nur Planer und Admin filtern
+    if role in ['Admin', 'Planer']:
+        if department_id:
+            query = query.where(Shift.department_id == int(department_id))
+        if filter_user_id:
+            query = query.where(Shift.user_id == int(filter_user_id))
+
+    # 4. Abfrage ausführen
+    query = query.order_by(Shift.shift_date)
+    shifts = db.session.scalars(query).all()
+
+    # Kollisionsprüfung für die Ansicht (Krankheits-Icons)
     for shift in shifts:
         absence = db.session.scalar(
             db.select(Absence).where(
@@ -178,7 +210,24 @@ def list_shifts():
         )
         shift.current_absence = absence 
         
-    return render_template("shift/list_shifts.html", shifts=shifts)
+    # 5. Listen für die Filter-Dropdowns ins Template laden
+    filter_depts = []
+    filter_users = []
+    
+    if role == 'Admin':
+        filter_depts = db.session.scalars(db.select(Department)).all()
+        filter_users = db.session.scalars(db.select(User)).all()
+    elif role == 'Planer':
+        filter_depts = db.session.scalars(db.select(Department).where(Department.company_id == my_company_id)).all()
+        filter_users = db.session.scalars(db.select(User).where(User.company_id == my_company_id)).all()
+
+    return render_template(
+        "shift/list_shifts.html", 
+        shifts=shifts, 
+        filter_depts=filter_depts, 
+        filter_users=filter_users,
+        current_filters=request.args # Wir übergeben die gewählten Filter ans HTML zurück
+    )
 
 
 @shift_bp.route("/edit/<int:shift_id>", methods=["GET", "POST"])
@@ -220,3 +269,148 @@ def edit_shift(shift_id):
     )
 
     return render_template("shift/edit_shift.html", shift=shift, absence=absence)
+
+
+@shift_bp.route("/delete/<int:shift_id>", methods=["POST"])
+@login_required
+@company_required
+@planer_or_admin_required
+def delete_shift(shift_id):
+    """Löscht eine bestehende Schicht sicher aus der Datenbank."""
+    shift = db.session.get(Shift, shift_id)
+    
+    if not shift:
+        flash("Schicht nicht gefunden.", "error")
+        return redirect(url_for("shift.list_shifts"))
+
+    # Sicherheits-Check: Gehört die Schicht wirklich zur Firma des Planers?
+    user_data = getattr(current_user, 'user_data', None)
+    role = user_data.role.description if user_data and user_data.role else None
+    my_company_id = user_data.company_id if user_data else None
+
+    # Der Admin darf alles löschen. Der Planer nur Schichten seiner Firma.
+    if role != 'Admin':
+        if shift.department.company_id != my_company_id:
+            flash("Sicherheitswarnung: Du kannst nur Schichten deiner eigenen Firma löschen!", "error")
+            return redirect(url_for("shift.list_shifts"))
+
+    # Wenn alles passt: Schicht löschen
+    db.session.delete(shift)
+    db.session.commit()
+    
+    flash("Die Schicht wurde erfolgreich gelöscht.", "success")
+    return redirect(url_for("shift.list_shifts"))
+
+
+@shift_bp.route("/weekly")
+@login_required
+@company_required
+def weekly_plan():
+    """Wochenansicht (Plantafel) für Schichten."""
+    user_data = current_user.user_data
+    role = user_data.role.description if user_data and user_data.role else "Mitarbeiter"
+    my_company_id = user_data.company_id
+    my_department_id = user_data.department_id
+
+    # 1. Datum der anzuzeigenden Woche bestimmen (Standard: heute)
+    target_date_str = request.args.get("date")
+    if target_date_str:
+        target_date = datetime.strptime(target_date_str, "%Y-%m-%d").date()
+    else:
+        target_date = date.today()
+
+    # Montag (0) bis Sonntag (6) der ausgewählten Woche berechnen
+    start_of_week = target_date - timedelta(days=target_date.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+    
+    # Eine Liste mit den 7 Tagen der Woche für den Tabellenkopf
+    week_dates = [start_of_week + timedelta(days=i) for i in range(7)]
+
+    # Mitarbeiter laden (Rechte-Prüfung!)
+    department_filter = request.args.get("department_id")
+    user_query = db.select(User)
+    
+    if role == "Admin":
+        # Admin sieht alles, kann nach Abteilung filtern
+        if department_filter:
+            user_query = user_query.where(User.department_id == department_filter)
+    elif role == "Planer":
+        # Planer sieht nur SEINE Firma, kann nach Abteilung filtern
+        user_query = user_query.where(User.company_id == my_company_id)
+        if department_filter:
+            user_query = user_query.where(User.department_id == department_filter)
+    else:
+        # Mitarbeiter sieht nur SEINE EIGENE Abteilung
+        user_query = user_query.where(User.department_id == my_department_id)
+
+    users = db.session.scalars(user_query.order_by(User.lastname)).all()
+    user_ids = [u.id for u in users]
+
+    # Schichten für diese Woche und diese Mitarbeiter laden
+    shifts = []
+    if user_ids:
+        shift_query = db.select(Shift).where(
+            Shift.user_id.in_(user_ids),
+            Shift.shift_date >= start_of_week,
+            Shift.shift_date <= end_of_week
+        )
+        shifts = db.session.scalars(shift_query).all()
+
+    # Die Matrix bauen: dictionary -> user_id -> date -> [Schichten]
+    schedule_matrix = {u.id: {d: [] for d in week_dates} for u in users}
+    for shift in shifts:
+        # +++ Qualifikationsprüfung +++
+        # Wir wandeln die Listen in "Sets" um. So können wir einfach die Differenz berechnen.
+        required_skills = set(shift.shift_type.qualifications)
+        user_skills = set(shift.user.qualifications)
+        
+        # Wenn Fähigkeiten gefordert sind, die der User nicht hat, bleibt etwas übrig
+        missing_skills = required_skills - user_skills
+        shift.has_missing_skills = len(missing_skills) > 0
+
+        if shift.user_id in schedule_matrix and shift.shift_date in schedule_matrix[shift.user_id]:
+            schedule_matrix[shift.user_id][shift.shift_date].append(shift)
+
+
+    # +++ Kollisionsprüfung (Überschneidungen finden) +++
+    for user_id, days in schedule_matrix.items():
+        for day, day_shifts in days.items():
+            # Nur prüfen, wenn es mehr als 1 Schicht an diesem Tag gibt
+            if len(day_shifts) > 1:
+                # Schichten nach Startzeit sortieren
+                day_shifts.sort(key=lambda s: s.shift_start)
+                
+                for i in range(len(day_shifts) - 1):
+                    current_s = day_shifts[i]
+                    next_s = day_shifts[i+1]
+                    
+                    # Wenn die nächste Schicht anfängt, BEVOR die aktuelle aufhört -> Überschneidung!
+                    if next_s.shift_start < current_s.shift_end:
+                        # Wir heften dynamisch ein temporäres Attribut an das Objekt
+                        current_s.has_collision = True
+                        next_s.has_collision = True
+
+    # Abteilungen für den Dropdown-Filter laden (nur für Planer/Admin)
+    departments = []
+    if role in ["Admin", "Planer"]:
+        dept_query = db.select(Department)
+        if role == "Planer":
+            dept_query = dept_query.where(Department.company_id == my_company_id)
+        departments = db.session.scalars(dept_query).all()
+
+    # Blätter-Buttons (Vorherige/Nächste Woche)
+    prev_week = start_of_week - timedelta(days=7)
+    next_week = start_of_week + timedelta(days=7)
+
+    return render_template(
+        "shift/weekly_plan.html",
+        users=users,
+        week_dates=week_dates,
+        schedule_matrix=schedule_matrix,
+        start_of_week=start_of_week,
+        end_of_week=end_of_week,
+        departments=departments,
+        current_department=department_filter,
+        prev_week=prev_week,
+        next_week=next_week
+    )

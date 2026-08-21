@@ -6,6 +6,56 @@
 
 {% block content %}
     
+    <!-- 1. DER FILTER: Immer sichtbar, auch wenn es 0 Ergebnisse gibt -->
+    <div class="filter-card" style="background: #f9f9f9; padding: 15px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ddd;">
+        <form method="GET" action="{{ url_for('shift.list_shifts') }}" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
+            
+            <!-- Datum: Für alle sichtbar -->
+            <div>
+                <label for="start_date">Von Datum:</label><br>
+                <input type="date" name="start_date" id="start_date" value="{{ current_filters.get('start_date', '') }}">
+            </div>
+            <div>
+                <label for="end_date">Bis Datum:</label><br>
+                <input type="date" name="end_date" id="end_date" value="{{ current_filters.get('end_date', '') }}">
+            </div>
+
+            <!-- Abteilungen & Mitarbeiter: Nur für Admin und Planer -->
+            {% if current_user.user_data.role and current_user.user_data.role.description in ['Admin', 'Planer'] %}
+            <div>
+                <label for="department_id">Abteilung:</label><br>
+                <select name="department_id" id="department_id">
+                    <option value="">-- Alle Abteilungen --</option>
+                    {% for dept in filter_depts %}
+                        <option value="{{ dept.id }}" {% if current_filters.get('department_id') == dept.id|string %}selected{% endif %}>
+                            {{ dept.department_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="user_id">Mitarbeiter:</label><br>
+                <select name="user_id" id="user_id">
+                    <option value="">-- Alle Mitarbeiter --</option>
+                    {% for u in filter_users %}
+                        <option value="{{ u.id }}" {% if current_filters.get('user_id') == u.id|string %}selected{% endif %}>
+                            {{ u.firstname }} {{ u.lastname }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+
+            <!-- Buttons -->
+            <div>
+                <button type="submit" style="background-color: #2c3e50; color: white; padding: 8px 15px; border: none; cursor: pointer; border-radius: 4px;">Filtern</button>
+                <a href="{{ url_for('shift.list_shifts') }}" style="text-decoration: none; color: #e67e22; margin-left: 10px;">Filter zurücksetzen</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- 2. DIE TABELLE: Nur anzeigen, wenn es nach dem Filtern auch Treffer gibt -->
     {% if shifts %}
         <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; text-align: left;">
             <thead>
@@ -15,20 +65,20 @@
                     <th>Abteilung</th>
                     <th>Schichtart</th>
                     <th>Zeitraum</th>
-                    <th>Aktion</th>
+                    
+                    <!-- Spalte Aktion auch nur für Planer/Admins anzeigen -->
+                    {% if current_user.user_data.role and current_user.user_data.role.description in ['Admin', 'Planer'] %}
+                        <th>Aktion</th>
+                    {% endif %}
                 </tr>
             </thead>
             <tbody>
                 {% for shift in shifts %}
                 <tr>
-                    <!-- .strftime('%d.%m.%Y') formatiert das Datum in das deutsche Format (Tag.Monat.Jahr) -->
                     <td>{{ shift.shift_date.strftime('%d.%m.%Y') }}</td>
                     
-                    <!-- Dank der relationships in shift.py können wir direkt auf den Vornamen zugreifen -->
                     <td>
                         {{ shift.user.firstname }} {{ shift.user.lastname }}
-                        
-                        <!-- Das rote Warnschild für Fehlzeiten in der Übersicht -->
                         {% if shift.current_absence %}
                             <br>
                             <span style="color: red; font-size: 0.85em; font-weight: bold;">
@@ -41,19 +91,34 @@
                     <td>{{ shift.shift_type.name }}</td>
                     <td>{{ shift.shift_start.strftime('%H:%M') }} - {{ shift.shift_end.strftime('%H:%M') }} Uhr</td>
 
-                    <!-- Der Bearbeiten-Link übergibt die ID der Schicht an die Route -->
+                    <!-- Aktion-Button ausblenden für normale Mitarbeiter -->
+                    {% if current_user.user_data.role and current_user.user_data.role.description in ['Admin', 'Planer'] %}
                     <td>
-                        <a href="{{ url_for('shift.edit_shift', shift_id=shift.id) }}">Bearbeiten</a>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <a href="{{ url_for('shift.edit_shift', shift_id=shift.id) }}">Bearbeiten</a>
+                            
+                            <!-- Das Formular für den POST-Request zum Löschen -->
+                            <form action="{{ url_for('shift.delete_shift', shift_id=shift.id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Möchtest du diese Schicht wirklich unwiderruflich löschen?');">
+                                <button type="submit" style="background: none; border: none; color: red; text-decoration: underline; cursor: pointer; padding: 0; font-size: 1rem;">
+                                    Löschen
+                                </button>
+                            </form>
+                        </div>
                     </td>
+                    {% endif %}
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     {% else %}
-        <p>Bisher wurden noch keine Schichten eingetragen.</p>
+        <!-- Wenn der Filter 0 Treffer hat -->
+        <p style="text-align: center; margin-top: 2rem;">Keine Schichten für diesen Filter gefunden.</p>
     {% endif %}
 
     <br>
-    <a href="{{ url_for('shift.assign_shift') }}">Neue Schicht zuweisen</a>
+    <!-- 3. NEUE SCHICHT: Auch nur für Befugte sichtbar -->
+    {% if current_user.user_data.role and current_user.user_data.role.description in ['Admin', 'Planer'] %}
+        <a href="{{ url_for('shift.assign_shift') }}">Neue Schicht zuweisen</a>
+    {% endif %}
 
 {% endblock content %}

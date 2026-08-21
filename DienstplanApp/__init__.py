@@ -57,6 +57,9 @@ def create_app(test_config = None):
     from DienstplanApp.routes.info_bp import info_bp
     app.register_blueprint(info_bp)
 
+    from DienstplanApp.routes.employee_bp import employee_bp
+    app.register_blueprint(employee_bp)
+
     ###### Fehlerbehandlung (Error Handlers) #########
     @app.errorhandler(CSRFError)
     def handle_csrf_error(e):
@@ -72,6 +75,8 @@ def create_app(test_config = None):
     from DienstplanApp.models.shift import Shift
     from DienstplanApp.models.shift_type import Shift_Type
     from DienstplanApp.models.absence import Absence
+    from DienstplanApp.models.ticket import Ticket
+    from DienstplanApp.models.invite_code import InviteCode
 
     return app
  

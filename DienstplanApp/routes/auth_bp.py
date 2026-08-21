@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.datastructures import ImmutableMultiDict
@@ -34,7 +36,7 @@ def register():
         agb = request.form.get("agb", "")
         dsgvo = request.form.get("dsgvo", "")
         password_confirm = request.form.get("password-confirm", "")
-        #invite_code = request.form.get("invite-code", "").strip()
+        invite_code = request.form.get("invite-code", "").strip()
 
         form_data = request.form.to_dict()
         ignore_fields = ['password', 'password-confirm']
@@ -91,7 +93,30 @@ def register():
             if check_email(email):
                 generate_password_hash(password)
             else:
-                # Wir suchen die Standard-Rolle "Mitarbeiter" +++
+                # +++ Einladungscode +++
+
+                assigned_company_id = None
+                assigned_department_id = None
+
+                if invite_code:
+                    from DienstplanApp.models.invite_code import InviteCode
+                    
+                    valid_code = db.session.scalar(
+                        db.select(InviteCode).where(
+                            InviteCode.code == invite_code, 
+                            InviteCode.is_active == True,
+                            InviteCode.expires_at >= datetime.now(timezone.utc)
+                        )
+                    )
+                    if not valid_code:
+                        flash("Der eingegebene Einladungscode ist ungültig oder abgelaufen.", "error")
+                        return render_template("auth/register.html", form_data=form_data)
+                    
+                    assigned_company_id = valid_code.company_id
+                    assigned_department_id = valid_code.department_id
+
+
+                # Wir suchen die Standard-Rolle "Mitarbeiter"
                 default_role = db.session.scalar(db.select(Role).where(Role.description == "Mitarbeiter"))
 
                 # Datenbankeintrag wird erstellt
@@ -100,17 +125,19 @@ def register():
                 db.session.add(user_login)
                 db.session.commit()
                 
-                stmt = db.select(User_login).filter_by(email=email)
-                user_login_id = db.session.execute(stmt).scalar()
-                user_id = user_login_id.id
+                # ID direkt vom neu erstellten Objekt nehmen!
+                user_id = user_login.id
                 
-                # +++ übergeben die role_id an den User +++
+                # +++ übergeben die role_id und company_id an den User +++
                 user = User(
                     login_id=user_id, 
                     firstname=firstname, 
                     lastname=lastname,
-                    role_id=default_role.id if default_role else None
+                    role_id=default_role.id if default_role else None,
+                    company_id=assigned_company_id,
+                    department_id=assigned_department_id
                 )
+
                 db.session.add(user)
                 db.session.commit()
 
