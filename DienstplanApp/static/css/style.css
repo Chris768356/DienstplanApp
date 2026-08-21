@@ -1,0 +1,120 @@
+/* =========================
+   Grundeinstellungen
+   ========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #F4F6FA;
+    min-height: 100vh;
+    font-family: "Inter", sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================
+   Header
+   ========================= */
+
+header h1 {
+    display: flex;
+    align-items: center;
+}
+
+header {
+    background-color: #243B68;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    align-items: center;
+}
+
+header h1 img {
+    width: 50px;
+}
+
+/* =========================
+   Navigation
+   ========================= */
+
+nav a {
+    color: white;
+    text-decoration: none;
+}
+
+nav ul {
+    display: flex;
+    gap: 25px;
+    list-style: none;
+}
+
+
+/* =========================
+   Main
+   ========================= */
+
+main {
+    flex: 1;
+}
+
+/* =========================
+   Footer
+   ========================= */
+
+footer {
+    background-color: #243B68;
+    padding: 20px;
+}
+
+/* =========================
+   Buttons
+   ========================= */
+
+
+/* =========================
+   Formulare
+   ========================= */
+
+.form-card img {
+    width: 70px;
+    display: block;
+    margin: 0 auto 15px;
+}
+
+.form-card {
+    background-color: white;
+    padding: 30px;
+    width: 400px;
+    margin: 40px auto;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.form-card button {
+    display: block;
+    margin: 10px auto 0px;
+}
+
+.form-card h2 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.form-card input {
+    margin-bottom: 10px;
+}
+
+/* =========================
+   Meldungen
+   ========================= */
+
+
+/* =========================
+   Profil
+   ========================= */
