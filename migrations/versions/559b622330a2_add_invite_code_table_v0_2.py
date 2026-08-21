@@ -1,8 +1,8 @@
-"""empty message
+"""add invite code table v0.2
 
-Revision ID: dc4ceadc9440
-Revises: 0437cb8e38a0
-Create Date: 2026-08-20 12:14:18.151995
+Revision ID: 559b622330a2
+Revises: a3a05330fbfe
+Create Date: 2026-08-21 09:11:26.837735
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'dc4ceadc9440'
-down_revision = '0437cb8e38a0'
+revision = '559b622330a2'
+down_revision = 'a3a05330fbfe'
 branch_labels = None
 depends_on = None
 
@@ -22,8 +22,11 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('code', sa.String(length=20), nullable=False),
     sa.Column('company_id', sa.Integer(), nullable=False),
+    sa.Column('department_id', sa.Integer(), nullable=True),
+    sa.Column('expires_at', sa.DateTime(), nullable=False),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['company_id'], ['company.id'], ),
+    sa.ForeignKeyConstraint(['department_id'], ['department.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('code')
     )
