@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
 {% block header %}
-<h2>Registrieren</h2>
+
 {% endblock header %}
 
 {% block content %}
-<form action="" method="post">
+<form class="form-card" action="" method="post">
+    <img src="{{ url_for('static', filename='img/DienstButlerLogo.png') }}" alt="DienstButler Logo">
+    <h2>Registrieren</h2>
     <input type="text" name="firstname" id="firstname" placeholder="Vorname" value="{{ form_data.get('firstname','') }}"
         required>
     <input type="text" name="lastname" id="lastname" placeholder="Nachname" value="{{form_data.get('lastname', '')}}"
@@ -21,11 +23,15 @@
 
     <input type="text" name="invite-code" id="invite-code" placeholder="Einladungscode (optional)">
 
-    <input type="checkbox" name="dsgvo" id="dsgvo" value="dsgvo-accepted" required>
-    <label for="dsgvo"><a href="/dsgvo">DSGVO</a> gelesen und akzeptiert</label>
+    <div class="checkbox-group">
+        <input type="checkbox" name="dsgvo" id="dsgvo" value="dsgvo-accepted" required>
+        <label for="dsgvo"><a href="/dsgvo">DSGVO</a> gelesen und akzeptiert</label>
+    </div>
 
-    <input type="checkbox" name="agb" id="agb" value="agb-accepted" required>
-    <label for="agb"><a href="/agb">AGB</a> gelesen und akzeptiert</label>
+    <div class="checkbox-group">
+        <input type="checkbox" name="agb" id="agb" value="agb-accepted" required>
+        <label for="agb"><a href="/agb">AGB</a> gelesen und akzeptiert</label>
+    </div>
 
     <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
 

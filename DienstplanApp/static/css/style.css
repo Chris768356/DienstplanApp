@@ -75,6 +75,34 @@ footer {
    Buttons
    ========================= */
 
+.edit-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 25px;
+}
+
+.edit-buttons button {
+    background-color: #243B68;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.edit-buttons a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 25px;
+    border: 1px solid #243B68;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #243B68;
+    font-size: 16px;
+}
 
 /* =========================
    Formulare
@@ -94,11 +122,29 @@ footer {
     border-radius: 10px;
     text-align: center;
     margin-bottom: 25px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.form-card input[type="email"],
+.form-card input[type="text"],
+.form-card input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
 }
 
 .form-card button {
     display: block;
     margin: 10px auto 0px;
+    background-color: #243B68;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
 }
 
 .form-card h2 {
@@ -110,11 +156,126 @@ footer {
     margin-bottom: 10px;
 }
 
+.checkbox-group {
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.checkbox-group:last-of-type {
+    margin-bottom: 20px;
+}
+
 /* =========================
    Meldungen
    ========================= */
 
+.flash {
+    padding: 12px 16px;
+    margin: 15px auto;
+    width: 400px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.flash.error {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.flash.success {
+    background-color: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
 
 /* =========================
    Profil
    ========================= */
+
+.profile-card {
+    background-color: white;
+    width: 600px;
+    margin: 50px auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.profile-tabs {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.profile-tabs a {
+    flex: 1;
+    text-align: center;
+    padding: 15px;
+    text-decoration: none;
+    color: #243B68;
+    font-weight: bold;
+}
+
+.profile-tabs a.active {
+    border-bottom: 3px solid #243B68;
+}
+
+.profile-info {
+    padding: 30px;
+}
+
+.profile-info h3 {
+    margin: 0;
+    text-align: center;
+    font-size: 24px;
+}
+
+.profile-email {
+    text-align: center;
+    margin-top: 5px;
+    color: #6b7280;
+}
+
+.profile-data {
+    margin-top: 30px;
+}
+
+.profile-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.profile-row span {
+    color: #6b7280;
+}
+
+.profile-row strong {
+    color: #243B68;
+}
+
+.profile-tabs a:hover {
+    background-color: #f3f4f6;
+}
+
+.edit-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 18px;
+}
+
+.edit-row label {
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #243B68;
+}
+
+.edit-row input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+}

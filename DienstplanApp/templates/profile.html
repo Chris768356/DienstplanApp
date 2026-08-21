@@ -7,29 +7,95 @@
 {% block content %}
 
 {% if request.args.get("mode") == "edit" %}
-<form action="" method="post">
-    <ul>
-        <li>Vorname: <input type="text" name="firstname" id="firstname" , value="{{current_user.user_data.firstname}}">
-        </li>
-        <li>Nachname: <input type="text" name="lastname" id="lastname" value="{{current_user.user_data.lastname}}"></li>
-        <li>E-Mail: <input type="text" name="email" id="email" value="{{current_user.email}}"></li>
-        <li>E-Mail bestätigen : <input type="text" name="email-confirm" id="email-confirm"
-                value="{{current_user.email}}"></li>
-    </ul>
-    <button type="submit">Speichern</button>
-    <a href="/profile">abbrechen</a>
-</form>
+<div class="profile-card">
+
+    <div class="profile-tabs">
+        <a href="/profile/">Profil</a>
+        <a href="?mode=edit" class="active">Bearbeiten</a>
+    </div>
+
+    <div class="profile-info">
+
+        <form action="" method="post">
+
+            <div class="edit-row">
+                <label for="firstname">Vorname</label>
+                <input type="text" name="firstname" id="firstname" value="{{ current_user.user_data.firstname }}">
+            </div>
+
+            <div class="edit-row">
+                <label for="lastname">Nachname</label>
+                <input type="text" name="lastname" id="lastname" value="{{ current_user.user_data.lastname }}">
+            </div>
+
+            <div class="edit-row">
+                <label for="email">E-Mail</label>
+                <input type="text" name="email" id="email" value="{{ current_user.email }}">
+            </div>
+
+            <div class="edit-row">
+                <label for="email-confirm">E-Mail bestätigen</label>
+                <input type="text" name="email-confirm" id="email-confirm" value="{{ current_user.email }}">
+            </div>
+
+            <div class="edit-buttons">
+                <button type="submit">Speichern</button>
+                <a href="/profile/">Abbrechen</a>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
 {% else %}
-<ul>
-    <li>Vorname: {{current_user.user_data.firstname}}</li>
-    <li>Nachname: {{current_user.user_data.lastname}}</li>
-    <li>E-Mail: {{current_user.email}}</li>
-    <li>Firmenname: {{current_user.user_data.company_id.company_name}}</li>
-    {% if current_user.user_data.department_id %}
-    <li>Abteilung: {{current_user.user_data.department_id.department_name}}</li>
-    {% endif %}
-</ul>
-<a href="?mode=edit">bearbeiten</a>
+<div class="profile-card">
+
+    <div class="profile-tabs">
+        <a href="/profile/" class="active">Profil</a>
+        <a href="?mode=edit">Bearbeiten</a>
+    </div>
+
+    <div class="profile-info">
+        <h3>
+            {{ current_user.user_data.firstname }}
+            {{ current_user.user_data.lastname }}
+        </h3>
+
+        <p class="profile-email">{{ current_user.email }}</p>
+
+        <div class="profile-data">
+            <div class="profile-row">
+                <span>Vorname</span>
+                <strong>{{ current_user.user_data.firstname }}</strong>
+            </div>
+
+            <div class="profile-row">
+                <span>Nachname</span>
+                <strong>{{ current_user.user_data.lastname }}</strong>
+            </div>
+
+            <div class="profile-row">
+                <span>E-Mail</span>
+                <strong>{{ current_user.email }}</strong>
+            </div>
+
+            <div class="profile-row">
+                <span>Firma</span>
+                <strong>{{ current_user.user_data.company_id.company_name }}</strong>
+            </div>
+
+            {% if current_user.user_data.department_id %}
+            <div class="profile-row">
+                <span>Abteilung</span>
+                <strong>{{ current_user.user_data.department_id.department_name }}</strong>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
 {% endif %}
 
 {% endblock content %}
