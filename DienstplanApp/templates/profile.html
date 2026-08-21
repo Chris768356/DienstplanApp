@@ -70,10 +70,8 @@
             <li>Nachname: {{ current_user.user_data.lastname }}</li>
             <li>E-Mail: {{ current_user.email }}</li>
             
-            <!-- "_id" entfernt. Wir greifen auf das Beziehungsobjekt (relationship) zu, nicht auf die nackte ID (Integer) -->
             <li>Firmenname: {{ current_user.user_data.company.company_name }}</li>
             
-            <!-- "_id" entfernt für die Abfrage und die Anzeige -->
             {% if current_user.user_data.department %}
                 <li>Abteilung: {{ current_user.user_data.department.department_name }}</li>
             {% endif %}
@@ -90,7 +88,6 @@
             {% endif %}
 
         </ul>
-        <a href="?mode=edit">Bearbeiten</a>
     {% endif %}
 
 {% endblock %}

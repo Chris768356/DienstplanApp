@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block header %}
+    <h2>Mitarbeiter-Verwaltung</h2>
+{% endblock header %}
+
+{% block content %}
+    
+    <!-- Filter-Bereich -->
+    <div style="background: #f9f9f9; padding: 15px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #ddd;">
+        <form method="GET" action="{{ url_for('employee.list_employees') }}" style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
+            
+            <div>
+                <label for="department_id">Abteilung:</label><br>
+                <select name="department_id" id="department_id">
+                    <option value="">-- Alle Abteilungen --</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept.id }}" {% if current_filters.get('department_id') == dept.id|string %}selected{% endif %}>
+                            {{ dept.department_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="qualification_id">Qualifikation:</label><br>
+                <select name="qualification_id" id="qualification_id">
+                    <option value="">-- Alle Qualifikationen --</option>
+                    {% for qual in qualifications %}
+                        <option value="{{ qual.id }}" {% if current_filters.get('qualification_id') == qual.id|string %}selected{% endif %}>
+                            {{ qual.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <button type="submit" style="background-color: #2c3e50; color: white; padding: 8px 15px; border: none; cursor: pointer; border-radius: 4px;">Suchen</button>
+                <a href="{{ url_for('employee.list_employees') }}" style="text-decoration: none; color: #e67e22; margin-left: 10px;">Filter löschen</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Mitarbeiter-Tabelle -->
+    {% if users %}
+        <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; text-align: left;">
+            <thead style="background-color: #2c3e50; color: white;">
+                <tr>
+                    <th>Name</th>
+                    <th>Abteilung</th>
+                    <th>Wochenstunden</th>
+                    <th>Status</th>
+                    <th>Aktion</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr style="{% if not user.is_active %}opacity: 0.6; background-color: #f5f5f5;{% endif %}">
+                    <td><strong>{{ user.lastname }}, {{ user.firstname }}</strong></td>
+                    <td>{{ user.department.department_name if user.department else 'Ohne Abteilung' }}</td>
+                    <td>{{ user.weekly_hours if user.weekly_hours else '-' }} h</td>
+                    <td>
+                        {% if user.is_active %}
+                            <span style="color: green;">Aktiv</span>
+                        {% else %}
+                            <span style="color: red;">Inaktiv</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('employee.edit_employee', user_id=user.id) }}">&#9998; Profil bearbeiten</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="text-align: center; margin-top: 2rem;">Keine Mitarbeiter für diese Filterkriterien gefunden.</p>
+    {% endif %}
+
+{% endblock content %}

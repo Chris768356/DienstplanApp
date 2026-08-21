@@ -25,6 +25,7 @@
 
             {% if current_user.is_authenticated %}
                 <li><a href="{{url_for('shift.list_shifts')}}">Dienstplan ansehen</a></li>
+                <a href="{{ url_for('shift.weekly_plan') }}">Wochenplan</a>
                 <li><a href="{{url_for('absence.list_absences')}}">Abwesenheiten</a></li>
 
                 <!-- Dropdown für Planer & Admins -->
@@ -32,9 +33,11 @@
                 <li class="dropdown">
                     <button class="dropbtn">Planung ▾</button>
                     <div class="dropdown-content">
+                        <a href="{{ url_for('employee.list_employees') }}">Personalakte</a>
                         <a href="{{ url_for('shift.assign_shift') }}">Dienstplan schreiben</a>
                         <a href="{{url_for('qualification.create_qualification')}}">Qualifikationen</a>
                         <a href="{{url_for('shift.create_shift_type')}}">Schichtarten</a>
+                        <a href="{{ url_for('role.generate_invite') }}">Einladungscodes</a>
                     </div>
                 </li>
                 {% endif %}
