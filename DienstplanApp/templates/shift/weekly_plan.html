@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block header %}
+    <h2>Wochenplan: {{ start_of_week.strftime('%d.%m.%Y') }} - {{ end_of_week.strftime('%d.%m.%Y') }}</h2>
+{% endblock header %}
+
+{% block content %}
+    
+    <!-- Navigation & Filter -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
+        
+        <!-- Blättern -->
+        <div>
+            <a href="{{ url_for('shift.weekly_plan', date=prev_week.strftime('%Y-%m-%d'), department_id=current_department) }}" style="text-decoration: none; font-size: 1.2rem;">&laquo; Vorherige Woche</a>
+            <span style="margin: 0 15px;">|</span>
+            <a href="{{ url_for('shift.weekly_plan', department_id=current_department) }}" style="text-decoration: none;">Heute</a>
+            <span style="margin: 0 15px;">|</span>
+            <a href="{{ url_for('shift.weekly_plan', date=next_week.strftime('%Y-%m-%d'), department_id=current_department) }}" style="text-decoration: none; font-size: 1.2rem;">Nächste Woche &raquo;</a>
+        </div>
+
+        <!-- Abteilungsfilter (Nur für Admin/Planer) -->
+        {% if current_user.user_data.role and current_user.user_data.role.description in ['Admin', 'Planer'] %}
+        <form method="GET" action="{{ url_for('shift.weekly_plan') }}" style="margin: 0;">
+            <input type="hidden" name="date" value="{{ start_of_week.strftime('%Y-%m-%d') }}">
+            <select name="department_id" onchange="this.form.submit()">
+                <option value="">-- Alle Abteilungen --</option>
+                {% for dept in departments %}
+                    <option value="{{ dept.id }}" {% if current_department == dept.id|string %}selected{% endif %}>
+                        {{ dept.department_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Plantafel (Grid) -->
+    <div style="overflow-x: auto;">
+        <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; text-align: center; min-width: 1000px;">
+            <thead style="background-color: #2c3e50; color: white;">
+                <tr>
+                    <th style="text-align: left; width: 15%;">Mitarbeiter</th>
+                    {% for day in week_dates %}
+                        <!-- Wochentage formatieren z.B. Mo, 17.08. -->
+                        <th style="width: 12%;">
+                            {{ ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"][day.weekday()] }}<br>
+                            <small>{{ day.strftime('%d.%m.') }}</small>
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td style="text-align: left; font-weight: bold; background-color: #f1f2f6;">
+                        {{ user.lastname }}, {{ user.firstname }}
+                    </td>
+                    
+                    {% for day in week_dates %}
+                        <td style="vertical-align: top; padding: 5px;">
+                            
+                            <!-- Alle Schichten für diesen Mitarbeiter an diesem Tag -->
+                            {% for shift in schedule_matrix[user.id][day] %}
+                                
+                                <!-- Dynamische Farbe: Rot bei Kollision ODER fehlender Qualifikation -->
+                                <div style="background-color: {% if shift.has_collision or shift.has_missing_skills %}#e74c3c{% else %}#3498db{% endif %}; color: white; padding: 5px; margin-bottom: 5px; border-radius: 4px; font-size: 0.85em; text-align: left; {% if shift.has_collision or shift.has_missing_skills %}border: 2px solid darkred;{% endif %}">
+                                    
+                                    <!-- Warnung: Überschneidung -->
+                                    {% if shift.has_collision %}
+                                        <div style="font-weight: bold; margin-bottom: 3px; font-size: 1.1em;" title="Achtung: Zeitliche Überschneidung!">
+                                            ⚠️ Zeit-Fehler
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Warnung: Qualifikation fehlt -->
+                                    {% if shift.has_missing_skills %}
+                                        <div style="font-weight: bold; margin-bottom: 3px; font-size: 1.1em;" title="Achtung: Mitarbeiter hat nicht alle nötigen Qualifikationen!">
+                                            🎓 Quali-Fehler
+                                        </div>
+                                    {% endif %}
+
+                                    <strong>{{ shift.shift_start.strftime('%H:%M') }} - {{ shift.shift_end.strftime('%H:%M') }}</strong><br>
+                                    {{ shift.shift_type.name }}
+                                    
+                                    <!-- Bearbeiten-Link für Planer/Admin -->
+                                    {% if current_user.user_data.role and current_user.user_data.role.description in ['Admin', 'Planer'] %}
+                                        <div style="margin-top: 3px; text-align: right;">
+                                            <a href="{{ url_for('shift.edit_shift', shift_id=shift.id) }}" style="color: #f1c40f; text-decoration: none; font-size: 0.9em;">&#9998; Bearbeiten</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8">Keine Mitarbeiter für diesen Filter gefunden.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}

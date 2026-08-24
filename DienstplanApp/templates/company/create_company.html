@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block header %}
+    <h2>Neue Firma anlegen</h2>
+{% endblock header %}
+
+{% block content %}
+    <form action="{{ url_for('company.create_company') }}" method="POST">
+        <div>
+            <input type="text" name="company_name" placeholder="Firmenname *" required>
+        </div>
+        <div>
+            <input type="text" name="street" placeholder="Straße">
+            <input type="text" name="house_number" placeholder="Hausnummer">
+        </div>
+        <div>
+            <input type="text" name="zip_code" placeholder="PLZ">
+            <input type="text" name="city" placeholder="Stadt">
+        </div>
+        <div>
+            <input type="text" name="address" placeholder="Zusatzadresse (optional)">
+        </div>
+        <div>
+            <input type="text" name="phone" placeholder="Telefonnummer">
+            <input type="email" name="email" placeholder="E-Mail-Adresse der Firma">
+        </div>
+        
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit">Firma speichern</button>
+    </form>
+{% endblock content %}

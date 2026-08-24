@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block header %}
+    <h2>Benutzerverwaltung & Rechte</h2>
+{% endblock header %}
+
+{% block content %}
+    <p>Hier kannst du Mitarbeitern Planungs- oder Admin-Rechte zuweisen.</p>
+
+    <table border="1" cellpadding="8" cellspacing="0" style="width: 100%; text-align: left;">
+        <thead>
+            <tr>
+                <th>Mitarbeiter</th>
+                <th>Firma & Abteilung</th>
+                <th>Aktuelle Rolle</th>
+                <th>Rechte ändern</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td>{{ u.firstname }} {{ u.lastname }}</td>
+                <td>
+                    {% if u.department %}{{ u.department.department_name }}{% else %}-{% endif %}
+                </td>
+                <td>
+                    <strong>{% if u.role %}{{ u.role.description }}{% else %}Keine{% endif %}</strong>
+                </td>
+                <td>
+                    <!-- Formular für jede Tabellenzeile -->
+                    <form action="{{ url_for('role.manage_roles') }}" method="POST" style="margin: 0;">
+                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                        <select name="role_id" required>
+                            {% for r in roles %}
+                                <option value="{{ r.id }}" {% if u.role_id == r.id %}selected{% endif %}>
+                                    {{ r.description }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" style="padding: 2px 5px;">Speichern</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock content %}
