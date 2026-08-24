@@ -53,7 +53,10 @@
                 {% for user in users %}
                 <tr>
                     <td style="text-align: left; font-weight: bold; background-color: #f1f2f6;">
-                        {{ user.lastname }}, {{ user.firstname }}
+                        {{ user.lastname }}, {{ user.firstname }}<br>
+                        <small style="color: #555; font-weight: normal;">
+                            {{ user.scheduled_hours|round(1) }} / {{ user.weekly_hours or 0 }} Std.
+                        </small>
                     </td>
                     
                     {% for day in week_dates %}

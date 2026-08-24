@@ -65,6 +65,8 @@
                     <th>Code</th>
                     <th>Firma</th>
                     <th>Abteilung</th>
+                    <th>Erstellt von</th>
+                    <th>Erstellt am</th>
                     <th>Ablaufdatum</th>
                 </tr>
             </thead>
@@ -74,6 +76,14 @@
                     <td><strong>{{ code.code }}</strong></td>
                     <td>{{ code.company.company_name }}</td>
                     <td>{{ code.department.department_name if code.department else '-' }}</td>
+                    <td>
+                        {% if code.creator %}
+                        {{ code.creator.firstname }} {{ code.creator.lastname }}
+                        {% else %}
+
+                        {% endif %} 
+                    </td>
+                    <td>{{ code.created_at.strftime('%d.%m.%Y %H:%M') }} Uhr</td>
                     <td>{{ code.expires_at.strftime('%d.%m.%Y %H:%M') }} Uhr</td>
                 </tr>
                 {% endfor %}

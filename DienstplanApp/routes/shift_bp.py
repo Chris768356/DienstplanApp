@@ -402,6 +402,11 @@ def weekly_plan():
     prev_week = start_of_week - timedelta(days=7)
     next_week = start_of_week + timedelta(days=7)
 
+    for user in users:
+        user_week_shifts = [s for s in shifts if s.user_id == user.id]
+        user.scheduled_hours = sum(s.duration_hours for s in user_week_shifts)
+
+
     return render_template(
         "shift/weekly_plan.html",
         users=users,

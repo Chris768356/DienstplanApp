@@ -105,7 +105,7 @@ def register():
                         db.select(InviteCode).where(
                             InviteCode.code == invite_code, 
                             InviteCode.is_active == True,
-                            InviteCode.expires_at >= datetime.now(timezone.utc)
+                            InviteCode.expires_at >= datetime.now(timezone.utc).replace(tzinfo=None)
                         )
                     )
                     if not valid_code:
@@ -139,6 +139,9 @@ def register():
                 )
 
                 db.session.add(user)
+                #Einladungscode nach Benutzung entwerten
+                if invite_code and valid_code:
+                    valid_code.is_active = False
                 db.session.commit()
 
             flash(f"Willkommen {firstname} {lastname}! Registrierung erfolgreich.", "success")

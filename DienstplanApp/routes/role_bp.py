@@ -95,13 +95,14 @@ def generate_invite():
             company_id = my_company_id
 
         # Ablaufdatum berechnen
-        expires_at = datetime.now(timezone.utc) + timedelta(days=valid_days)
+        expires_at = datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=valid_days)
 
         new_code = InviteCode(
             code=InviteCode.generate_random_code(),
             company_id=int(company_id),
             department_id=int(department_id) if department_id else None,
-            expires_at=expires_at
+            expires_at=expires_at,
+            creator_id=current_user.user_data.id  # NEU: Trage den Ersteller des Codes ein!
         )
         db.session.add(new_code)
         db.session.commit()
@@ -114,11 +115,11 @@ def generate_invite():
         companies = db.session.scalars(db.select(Company)).all()
         departments = db.session.scalars(db.select(Department)).all()
         # Admin sieht alle aktiven Codes
-        active_codes = db.session.scalars(db.select(InviteCode).where(InviteCode.expires_at > datetime.now(timezone.utc))).all()
+        active_codes = db.session.scalars(db.select(InviteCode).where(InviteCode.expires_at > datetime.now(timezone.utc).replace(tzinfo=None))).all()
     else:
         companies = db.session.scalars(db.select(Company).where(Company.id == my_company_id)).all()
         departments = db.session.scalars(db.select(Department).where(Department.company_id == my_company_id)).all()
         # Planer sieht nur Codes seiner Firma
-        active_codes = db.session.scalars(db.select(InviteCode).where(InviteCode.company_id == my_company_id, InviteCode.expires_at > datetime.now(timezone.utc))).all()
+        active_codes = db.session.scalars(db.select(InviteCode).where(InviteCode.company_id == my_company_id, InviteCode.expires_at > datetime.now(timezone.utc).replace(tzinfo=None))).all()
 
     return render_template("role/generate_invite.html", companies=companies, departments=departments, active_codes=active_codes)
