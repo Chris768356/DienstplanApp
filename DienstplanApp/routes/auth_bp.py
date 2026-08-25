@@ -115,11 +115,27 @@ def register():
                     assigned_company_id = valid_code.company_id
                     assigned_department_id = valid_code.department_id
 
+                # +++ First-Run-Experience: Ist das der allererste Nutzer? +++
+                user_count = db.session.scalar(db.select(db.func.count(User.id)))
 
-                # Wir suchen die Standard-Rolle "Mitarbeiter"
-                default_role = db.session.scalar(db.select(Role).where(Role.description == "Mitarbeiter"))
+                if user_count == 0:
+                    # System ist leer! Rollen anlegen, falls noch nicht passiert
+                    if not db.session.scalar(db.select(Role)):
+                        db.session.add_all([
+                            Role(description="Admin"),
+                            Role(description="Planer"),
+                            Role(description="Mitarbeiter")
+                        ])
+                        db.session.commit()
+                    
+                    # Der allererste Nutzer wird sofort zum Admin
+                    assigned_role = db.session.scalar(db.select(Role).where(Role.description == "Admin"))
+                else:
+                    # Jeder weitere Nutzer wird standardmäßig Mitarbeiter
+                    assigned_role = db.session.scalar(db.select(Role).where(Role.description == "Mitarbeiter"))
 
-                # Datenbankeintrag wird erstellt
+
+                # Datenbankeintrag für den Login wird erstellt (Bleibt wie vorher)
                 user_login = User_login(email=email)
                 user_login.set_password(password)
                 db.session.add(user_login)
@@ -128,12 +144,12 @@ def register():
                 # ID direkt vom neu erstellten Objekt nehmen!
                 user_id = user_login.id
                 
-                # +++ übergeben die role_id und company_id an den User +++
+                # +++ Übergabe an den User (jetzt mit assigned_role) +++
                 user = User(
                     login_id=user_id, 
                     firstname=firstname, 
                     lastname=lastname,
-                    role_id=default_role.id if default_role else None,
+                    role_id=assigned_role.id if assigned_role else None,
                     company_id=assigned_company_id,
                     department_id=assigned_department_id
                 )
@@ -145,7 +161,6 @@ def register():
             return redirect(url_for("auth.login"))
 
     return render_template("auth/register.html", form_data = {})
-
 
 @auth.route("/login", methods=["GET","POST"])
 def login():
@@ -159,12 +174,17 @@ def login():
         if user:
             if user.check_password(password):
                 login_user(user)
+                
+                # +++ Die Onboarding-Weiche +++
+                # Wir prüfen: Hat der gerade eingeloggte Nutzer schon eine Firma?
+                if not user.user_data.company_id:
+                    # Wenn nein, schicken wir ihn zur neuen Onboarding-Seite
+                    return redirect(url_for("auth.welcome"))
+                
+                # Wenn ja, geht es ganz normal zum Dashboard
                 return redirect(url_for("index"))
             else:
                 flash("Email oder Passwort falsch.", "error")
-        else:
-            generate_password_hash(password)
-            flash("Email oder Passwort falsch.", "error")
 
     return render_template("auth/login.html")
 
@@ -176,3 +196,52 @@ def logout():
     logout_user()
     flash("Sie wurden erfolgreich ausgeloggt.", "success")
     return redirect(url_for("index"))
+
+
+@auth.route("/welcome", methods=["GET", "POST"])
+@login_required
+def welcome():
+    """Onboarding-Seite für eingeloggte User ohne Firma."""
+    
+    # Sicherheits-Check: Wenn der User schon eine Firma hat, braucht er diese Seite nicht
+    if current_user.user_data.company_id:
+        return redirect(url_for("index"))
+
+    if request.method == "POST":
+        invite_code = request.form.get("invite_code", "").strip()
+
+        if not invite_code:
+            flash("Bitte gib einen Einladungscode ein.", "error")
+            return redirect(url_for("auth.welcome"))
+
+        from DienstplanApp.models.invite_code import InviteCode
+        
+        # Prüfen, ob der Code existiert und noch gültig ist
+        valid_code = db.session.scalar(
+            db.select(InviteCode).where(
+                InviteCode.code == invite_code, 
+                InviteCode.is_active == True,
+                InviteCode.expires_at >= datetime.now(timezone.utc)
+            )
+        )
+
+        if not valid_code:
+            flash("Dieser Einladungscode ist leider ungültig oder abgelaufen.", "error")
+            return redirect(url_for("auth.welcome"))
+
+        # Code ist gültig: Firma und Abteilung an den User heften
+        current_user.user_data.company_id = valid_code.company_id
+        current_user.user_data.department_id = valid_code.department_id
+        
+        # Sicherstellen, dass er als normaler Mitarbeiter startet
+        from DienstplanApp.models.role import Role
+        default_role = db.session.scalar(db.select(Role).where(Role.description == "Mitarbeiter"))
+        if default_role:
+            current_user.user_data.role_id = default_role.id
+
+        db.session.commit()
+        
+        flash("Willkommen im Team! Du bist der Firma erfolgreich beigetreten.", "success")
+        return redirect(url_for("index"))
+
+    return render_template("auth/welcome.html")

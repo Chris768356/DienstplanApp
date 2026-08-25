@@ -1,5 +1,5 @@
 import secrets
-from datetime import datetime
+from datetime import datetime, timezone
 
 from DienstplanApp.extensions import db
 
@@ -17,6 +17,11 @@ class InviteCode(db.Model):
     # Gültigkeit
     expires_at = db.Column(db.DateTime, nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
+
+    # +++ Audit Trail +++
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    created_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    creator = db.relationship("User", foreign_keys=[created_by_id])
 
     company = db.relationship("Company")
     department = db.relationship("Department")

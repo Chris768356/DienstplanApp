@@ -65,7 +65,11 @@
                     <th>Code</th>
                     <th>Firma</th>
                     <th>Abteilung</th>
-                    <th>Ablaufdatum</th>
+                    <th>Erstellt am</th>
+                    <th>Erstellt von</th>
+                    <th>Gültig bis</th>
+                    <th>Status</th>
+                    <th>Aktion</th>
                 </tr>
             </thead>
             <tbody>
@@ -74,7 +78,25 @@
                     <td><strong>{{ code.code }}</strong></td>
                     <td>{{ code.company.company_name }}</td>
                     <td>{{ code.department.department_name if code.department else '-' }}</td>
+                    <td>{{ code.created_at.strftime('%d.%m.%Y %H:%M') if code.created_at else '-' }}</td>
+                    <td>{{ code.creator.firstname if code.creator else 'System' }}</td>
                     <td>{{ code.expires_at.strftime('%d.%m.%Y %H:%M') }} Uhr</td>
+                    <td>
+                        {% if code.is_active %}
+                            <span style="color: green;">Aktiv</span>
+                        {% else %}
+                            <span style="color: red;">Inaktiv</span>
+                        {% endif %}
+                    </td>
+                    <!-- Löschen-Button -->
+                    <td>
+                        <form action="{{ url_for('role.delete_invite', code_id=code.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Bist du sicher, dass du diesen Code löschen möchtest?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" style="background-color: #e74c3c; color: white; padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                                Löschen
+                            </button>
+                        </form>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

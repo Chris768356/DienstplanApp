@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block header %}
+    <h2>Willkommen bei deinem Dienst-Butler!</h2>
+{% endblock header %}
+
+{% block content %}
+    <div style="text-align: center; margin-bottom: 30px;">
+        <p style="font-size: 1.2rem; color: #555;">Dein Account ist startklar. Wie möchtest du fortfahren?</p>
+    </div>
+
+    <div style="display: flex; gap: 30px; justify-content: center; flex-wrap: wrap;">
+        
+        <!-- Option 1: Einer bestehenden Firma beitreten -->
+        <div style="background: #f9f9f9; padding: 30px; border-radius: 8px; border: 1px solid #ddd; flex: 1; min-width: 300px; max-width: 400px; text-align: center;">
+            <h3 style="color: #2c3e50;">Ich habe einen Einladungscode</h3>
+            <p style="margin-bottom: 20px;">Tritt dem Dienstplan deiner bestehenden Firma bei.</p>
+            
+            <form action="{{ url_for('auth.welcome') }}" method="POST">
+                <input type="text" name="invite_code" placeholder="Code hier eingeben..." required 
+                       style="width: 100%; padding: 10px; margin-bottom: 15px; text-align: center; font-size: 1.1rem; border: 1px solid #ccc; border-radius: 4px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" style="background-color: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-size: 1rem;">
+                    Firma beitreten
+                </button>
+            </form>
+        </div>
+
+        <!-- Option 2: Eine neue Firma anlegen (Als Admin) -->
+        <div style="background: #f9f9f9; padding: 30px; border-radius: 8px; border: 1px solid #ddd; flex: 1; min-width: 300px; max-width: 400px; text-align: center;">
+            <h3 style="color: #2c3e50;">Ich bin Planer/Admin</h3>
+            <p style="margin-bottom: 20px;">Richte das System für dein Unternehmen komplett neu ein.</p>
+            
+            <br>
+            <!-- HIER musst du den Link zu deiner Route anpassen, auf der man eine Firma erstellt -->
+            <a href="{{ url_for('company.create_company') }}" style="display: inline-block; background-color: #e67e22; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-size: 1rem; width: 85%;">
+                Neue Firma gründen
+            </a>
+        </div>
+
+    </div>
+{% endblock content %}

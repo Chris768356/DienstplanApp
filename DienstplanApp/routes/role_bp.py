@@ -101,7 +101,8 @@ def generate_invite():
             code=InviteCode.generate_random_code(),
             company_id=int(company_id),
             department_id=int(department_id) if department_id else None,
-            expires_at=expires_at
+            expires_at=expires_at,
+            created_by_id=current_user.user_data.id
         )
         db.session.add(new_code)
         db.session.commit()
@@ -122,3 +123,32 @@ def generate_invite():
         active_codes = db.session.scalars(db.select(InviteCode).where(InviteCode.company_id == my_company_id, InviteCode.expires_at > datetime.now(timezone.utc))).all()
 
     return render_template("role/generate_invite.html", companies=companies, departments=departments, active_codes=active_codes)
+
+@role_bp.route("/invite/delete/<int:code_id>", methods=["POST"])
+@login_required
+@company_required
+@planer_or_admin_required
+def delete_invite(code_id):
+    """Löscht einen Einladungscode aus der Datenbank."""
+    code_to_delete = db.session.get(InviteCode, code_id)
+    
+    if not code_to_delete:
+        flash("Einladungscode nicht gefunden.", "error")
+        return redirect(url_for("role.generate_invite"))
+
+    # Sicherheits-Check: Gehört der Code zur Firma des Planers?
+    user_data = getattr(current_user, 'user_data', None)
+    role = user_data.role.description if user_data and user_data.role else None
+    my_company_id = user_data.company_id if user_data else None
+
+    # Der Admin darf alles löschen. Der Planer nur Codes seiner Firma.
+    if role != 'Admin' and code_to_delete.company_id != my_company_id:
+        flash("Sicherheitswarnung: Du kannst nur Einladungscodes deiner eigenen Firma löschen!", "error")
+        return redirect(url_for("role.generate_invite"))
+
+    # Code löschen
+    db.session.delete(code_to_delete)
+    db.session.commit()
+    
+    flash("Der Einladungscode wurde erfolgreich gelöscht.", "success")
+    return redirect(url_for("role.generate_invite"))
