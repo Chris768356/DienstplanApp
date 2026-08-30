@@ -1,31 +1,34 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dienstplan-Butler</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
 
-<header>
-    <!-- +++ Logo und Titel nebeneinander +++ -->
-    <div style="display: flex; align-items: center; gap: 15px; padding-bottom: 15px;">
-        <a href="{{url_for('index')}}" style="display: flex; align-items: center; text-decoration: none;">
-            <img src="{{ url_for('static', filename='img/DienstButlerLogo.png') }}" alt="DienstButler Logo" style="height: 80px; display: block;">
-        </a>
-        <h1 style="margin: 0; margin-top: -25px; color: #2c3e50; line-height: 1;">Dienst-Butler</h1>
-    </div>
+    <header>
+        <!-- +++ Logo und Titel nebeneinander +++ -->
+        <div style="display: flex; align-items: center; gap: 15px; padding-bottom: 15px;">
+            <a href="{{url_for('index')}}" style="display: flex; align-items: center; text-decoration: none;">
+                <img src="{{ url_for('static', filename='img/DienstButlerLogo.png') }}" alt="DienstButler Logo"
+                    style="height: 80px; display: block;">
+            </a>
+            <h1>Dienst-Butler</h1>
+        </div>
 
-    <!-- +++ Navigation +++ -->
-    <nav class="main-nav">
-        <!-- Linke Seite: Hauptnavigation -->
-        <ul class="nav-links">
-            <li><a href="{{url_for('index')}}">Startseite</a></li>
+        <!-- +++ Navigation +++ -->
+        <nav class="main-nav">
+            <!-- Linke Seite: Hauptnavigation -->
+            <ul class="nav-links">
+                <li><a href="{{url_for('index')}}">Startseite</a></li>
 
-            {% if current_user.is_authenticated %}
+                {% if current_user.is_authenticated %}
                 <li><a href="{{url_for('shift.list_shifts')}}">Dienstplan ansehen</a></li>
-                <a href="{{ url_for('shift.weekly_plan') }}">Wochenplan</a>
+                <li><a href="{{ url_for('shift.weekly_plan') }}">Wochenplan</a></li>
                 <li><a href="{{url_for('absence.list_absences')}}">Abwesenheiten</a></li>
 
                 <!-- Dropdown für Planer & Admins -->
@@ -53,12 +56,12 @@
                     </div>
                 </li>
                 {% endif %}
-            {% endif %}
-        </ul>
+                {% endif %}
+            </ul>
 
-        <!-- Rechte Seite: Profil & Logout oder Login/Register -->
-        <ul class="nav-user">
-            {% if current_user.is_authenticated %}
+            <!-- Rechte Seite: Profil & Logout oder Login/Register -->
+            <ul class="nav-user {% if current_user.is_authenticated %}logged-in{% else %}logged-out{% endif %}">
+                {% if current_user.is_authenticated %}
                 <li class="dropdown">
                     <button class="dropbtn">Profil ▾</button>
                     <div class="dropdown-content right-aligned">
@@ -66,41 +69,43 @@
                         <a href="{{url_for('auth.logout')}}">Logout</a>
                     </div>
                 </li>
-            {% else %}
+                {% else %}
                 <li><a href="{{url_for('auth.login')}}">Login</a></li>
                 <li><a href="{{url_for('auth.register')}}">Registrieren</a></li>
-            {% endif %}
-        </ul>
-    </nav>
+                {% endif %}
+            </ul>
+        </nav>
+
+    </header>
+
     {% block header %}
-    
+
     {% endblock header %}
-</header>
-
-<main>
-    {% with messages = get_flashed_messages(with_categories=true) %}
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            {% for category, message in messages %}
-                <div class="flash" {{ category }}>{{ message }}</div>
-            {% endfor %}
+        {% for category, message in messages %}
+        <div class="flash" {{ category }}>{{ message }}</div>
+        {% endfor %}
         {% endif %}
-    {% endwith %}
+        {% endwith %}
 
-    {% block content %}
-    
-    {% endblock content %}
-</main>
+        {% block content %}
 
-<footer>
-    <div class="footer-content">
-        <p>&copy; 2026 Dienst-Butler. Alle Rechte vorbehalten.</p>
-        <div class="footer-links">
-            <a href="{{ url_for('info.impressum') }}">Impressum</a> | 
-            <a href="{{ url_for('info.datenschutz') }}">Datenschutz</a> | 
-            <a href="{{ url_for('info.support') }}">Support</a>
+        {% endblock content %}
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 Dienst-Butler. Alle Rechte vorbehalten.</p>
+            <div class="footer-links">
+                <a href="{{ url_for('info.impressum') }}">Impressum</a> |
+                <a href="{{ url_for('info.datenschutz') }}">Datenschutz</a> |
+                <a href="{{ url_for('info.support') }}">Support</a>
+            </div>
         </div>
-    </div>
-</footer>
+    </footer>
 
 </body>
+
 </html>
