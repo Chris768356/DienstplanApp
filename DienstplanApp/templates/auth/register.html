@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block header %}
+    <h2>Registrieren</h2>
+{% endblock %}
+
+{% block content %}
+    <form action="{{ url_for('auth.register') }}" method="POST">
+        
+        <!-- Hier werden die Werte wiederhergestellt -->
+        <input type="text" name="firstname" id="firstname" placeholder="Vorname" value="{{ form_data.get('firstname', '') }}" required>
+        
+        <input type="text" name="lastname" id="lastname" placeholder="Nachname" value="{{ form_data.get('lastname', '') }}" required>
+        
+        <input type="email" name="email" id="email" placeholder="E-Mail" value="{{ form_data.get('email', '') }}" required>
+        
+        <input type="email" name="email-confirm" id="email-confirm" placeholder="E-Mail bestätigen" value="{{ form_data.get('email-confirm', '') }}" required>
+        
+        <!-- Bei den Passwörtern setzen wir ABSICHTLICH keinen value, damit sie immer leer bleiben! -->
+        <input type="password" name="password" id="password" placeholder="Passwort" autocomplete="new-password" required>
+        
+        <input type="password" name="password-confirm" id="password-confirm" placeholder="Passwort bestätigen" autocomplete="new-password" required>
+        
+        <!-- Invite-Code wiederherstellen -->
+        <input type="text" name="invite-code" id="invite-code" placeholder="Einladungscode(optional)" value="{{ form_data.get('invite-code', '') }}">
+        
+        <!-- Checkboxen: Hier prüfen ob sie vorher angeklickt waren -->
+        <input type="checkbox" name="dsgvo" id="dsgvo" value="dsgvo-accepted" {% if form_data.get('dsgvo') %}checked{% endif %} required>
+        <label for="dsgvo"><a href="/dsgvo">DSGVO</a> gelesen und akzeptiert</label>
+        
+        <input type="checkbox" name="agb" id="agb" value="agb-accepted" {% if form_data.get('agb') %}checked{% endif %} required> 
+        <label for="agb"><a href="/agb">AGB</a> gelesen und akzeptiert</label>
+        
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit">Registrieren</button>
+        
+    </form>
+{% endblock %}
